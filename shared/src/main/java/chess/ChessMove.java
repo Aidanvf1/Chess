@@ -34,7 +34,7 @@ public class ChessMove {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ChessMove that = (ChessMove) o;
-        return Objects.equals(this.startPosition,that.startPosition)
+        return Objects.equals(this.startPosition, that.startPosition)
         && Objects.equals(this.endPosition, that.endPosition)
         && Objects.equals(this.promotionPiece, that.promotionPiece);
 
