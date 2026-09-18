@@ -36,6 +36,16 @@ public class ChessPiece {
         switch (type) {
             case KNIGHT:
                 return knightMoves(board, myPosition);
+            case KING:
+                return kingMoves(board, myPosition);
+            // case QUEEN:
+                // return queenMoves(board, myPosition);
+            // case ROOK:
+                // return rookMoves(board, myPosition);
+            // case BISHOP:
+                // return bishopMoves(board, myPosition);
+            // case PAWN:
+                // return pawnMoves(board, myPosition);
             default:
                 throw new RuntimeException("Not implemented");
 
@@ -62,6 +72,25 @@ public class ChessPiece {
         }
         return moves;
     }
+    public Collection<ChessMove> kingMoves(ChessBoard board, ChessPosition myPosition) {
+        Collection<ChessMove> moves = new ArrayList<>();
+        int[][] offsets = {
+                {0, 1}, {0, -1}, {1, 0}, {-1, 0}, {1, 1}, {1, -1}, {-1, 1}, {-1, -1}
+        };
+        for (int[] offset : offsets) {
+            int newRow = myPosition.getRow() + offset[0];
+            int newColumn = myPosition.getColumn() + offset[1];
+            if (newRow >= 1 && newRow <= 8 && newColumn >= 1 && newColumn <= 8) {
+                ChessPosition newPosition = new ChessPosition(newRow, newColumn);
+                ChessPiece occupyingPiece = board.getPiece(newPosition);
+                if (occupyingPiece == null || occupyingPiece.getTeamColor() != this.pieceColor) {
+                    moves.add(new ChessMove(myPosition, newPosition, null));
+                }
+            }
+        }
+        return moves;
+    }
+
 
     @Override
     public boolean equals(Object o) {
