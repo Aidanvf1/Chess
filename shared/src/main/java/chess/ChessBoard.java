@@ -1,5 +1,7 @@
 package chess;
 
+import java.util.Arrays;
+
 public class ChessBoard {
     private final ChessPiece[][] squares = new ChessPiece[8][8];
 
@@ -37,5 +39,17 @@ public class ChessBoard {
             addPiece(new ChessPosition(8, col), new ChessPiece(ChessGame.TeamColor.BLACK, backRank[col - 1]));
         }
 
+    }
+    @Override
+    public boolean equals(Object o){
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ChessBoard that = (ChessBoard) o;
+        return Arrays.deepEquals(this.squares, that.squares);
+    }
+
+    @Override
+    public int hashCode(){
+        return Arrays.deepHashCode(squares);
     }
 }
