@@ -1,5 +1,6 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Objects;
 
 import java.util.Collection;
@@ -42,13 +43,44 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        throw new RuntimeException("Not implemented");
+        switch (type) {
+            case KNIGHT:
+                return knightMoves(board, myPosition);
+            default:
+                throw new RuntimeException("Not implemented");
+
+        }
+
+    }
+
+    public Collection<ChessMove> knightMoves(ChessBoard board, ChessPosition myPosition) {
+        Collection<ChessMove> moves = new ArrayList<>();
+        int[][] offsets = {
+                {2, 1}, {2, -1}, {-2, 1}, {-2, -1},
+                {1, 2}, {1, -2}, {-1, 2}, {-1, -2}
+        };
+        for (int[] offset : offsets) {
+            int newRow = myPosition.getRow() + offset[0];
+            int newColumn = myPosition.getColumn() + offset[1];
+            if (newRow >= 1 && newRow <= 8 && newColumn >= 1 && newColumn <= 8) {
+                ChessPosition newPosition = new ChessPosition(newRow, newColumn);
+                ChessPiece occupyingPiece = board.getPiece(newPosition);
+                if (occupyingPiece == null || occupyingPiece.getTeamColor() != this.pieceColor) {
+                    moves.add(new ChessMove(myPosition, newPosition, null));
+                }
+            }
+        }
+        return moves;
     }
 
     @Override
-    public boolean equals(Object o){
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         ChessPiece that = (ChessPiece) o;
         return Objects.equals(this.pieceColor, that.pieceColor)
                 && Objects.equals(this.type, that.type);
@@ -56,7 +88,7 @@ public class ChessPiece {
     }
 
     @Override
-    public int hashCode(){
+    public int hashCode() {
         return Objects.hash(pieceColor, type);
     }
 }
