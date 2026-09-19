@@ -44,8 +44,8 @@ public class ChessPiece {
                 return rookMoves(board, myPosition);
             case BISHOP:
                 return bishopMoves(board, myPosition);
-            // case PAWN:
-                // return pawnMoves(board, myPosition);
+            case PAWN:
+                return pawnMoves(board, myPosition);
             default:
                 throw new RuntimeException("Not implemented");
 
@@ -72,6 +72,7 @@ public class ChessPiece {
         }
         return moves;
     }
+
     public Collection<ChessMove> kingMoves(ChessBoard board, ChessPosition myPosition) {
         Collection<ChessMove> moves = new ArrayList<>();
         int[][] offsets = {
@@ -90,6 +91,7 @@ public class ChessPiece {
         }
         return moves;
     }
+
     public Collection<ChessMove> rookMoves(ChessBoard board, ChessPosition myPosition) {
         Collection<ChessMove> moves = new ArrayList<>();
         int[][] directions = {
@@ -120,6 +122,7 @@ public class ChessPiece {
         }
         return moves;
     }
+
     public Collection<ChessMove> bishopMoves(ChessBoard board, ChessPosition myPosition) {
         Collection<ChessMove> moves = new ArrayList<>();
         int[][] directions = {
@@ -150,12 +153,13 @@ public class ChessPiece {
         }
         return moves;
     }
-    public Collection<ChessMove> queenMoves(ChessBoard board, ChessPosition myPosition){
+
+    public Collection<ChessMove> queenMoves(ChessBoard board, ChessPosition myPosition) {
         Collection<ChessMove> moves = new ArrayList<>();
         int[][] directions = {
                 {-1, 1}, {1, -1}, {1, 1}, {-1, -1}, {1, 0}, {-1, 0}, {0, 1}, {0, -1}
         };
-        for (int[] direction : directions){
+        for (int[] direction : directions) {
             int newRow = myPosition.getRow();
             int newColumn = myPosition.getColumn();
             while (true) {
@@ -181,25 +185,42 @@ public class ChessPiece {
         return moves;
     }
 
+    public Collection<ChessMove> pawnMoves(ChessBoard board, ChessPosition myPosition) {
+        Collection<ChessMove> moves = new ArrayList<>();
 
+        int direction = (this.pieceColor == ChessGame.TeamColor.WHITE) ? 1 : -1;
 
+        int newRow = myPosition.getRow() + direction;
+        int newColumn = myPosition.getColumn();
+        if (newRow >= 1 && newRow <= 8) {
+            ChessPosition newPosition = new ChessPosition(newRow, newColumn);
+            ChessPiece occupyingPiece = board.getPiece(newPosition);
+            if (occupyingPiece == null) {
+                moves.add(new ChessMove(myPosition, newPosition, null));
+            }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
         }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        ChessPiece that = (ChessPiece) o;
-        return Objects.equals(this.pieceColor, that.pieceColor)
-                && Objects.equals(this.type, that.type);
 
+        return moves;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(pieceColor, type);
-    }
-}
+
+            @Override
+            public boolean equals (Object o){
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            ChessPiece that = (ChessPiece) o;
+            return Objects.equals(this.pieceColor, that.pieceColor)
+                    && Objects.equals(this.type, that.type);
+
+        }
+
+            @Override
+            public int hashCode () {
+            return Objects.hash(pieceColor, type);
+        }
+        }
