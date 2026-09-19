@@ -42,8 +42,8 @@ public class ChessPiece {
                 // return queenMoves(board, myPosition);
             case ROOK:
                 return rookMoves(board, myPosition);
-            // case BISHOP:
-                // return bishopMoves(board, myPosition);
+            case BISHOP:
+                return bishopMoves(board, myPosition);
             // case PAWN:
                 // return pawnMoves(board, myPosition);
             default:
@@ -117,6 +117,36 @@ public class ChessPiece {
                 }
 
             }
+        }
+        return moves;
+    }
+    public Collection<ChessMove> bishopMoves(ChessBoard board, ChessPosition myPosition) {
+        Collection<ChessMove> moves = new ArrayList<>();
+        int[][] directions = {
+                {-1, 1}, {1, -1}, {1, 1}, {-1, -1}
+        };
+        for (int[] direction : directions) {
+            int newRow = myPosition.getRow();
+            int newColumn = myPosition.getColumn();
+            while (true) {
+                newRow += direction[0];
+                newColumn += direction[1];
+                if (newRow < 1 || newRow > 8 || newColumn < 1 || newColumn > 8) {
+                    break;
+                }
+                ChessPosition newPosition = new ChessPosition(newRow, newColumn);
+                ChessPiece occupyingPiece = board.getPiece(newPosition);
+                if (occupyingPiece == null) {
+                    moves.add(new ChessMove(myPosition, newPosition, null));
+                } else {
+                    if (occupyingPiece.getTeamColor() != this.pieceColor) {
+                        moves.add(new ChessMove(myPosition, newPosition, null));
+                    }
+                    break;
+                }
+
+            }
+
         }
         return moves;
     }
