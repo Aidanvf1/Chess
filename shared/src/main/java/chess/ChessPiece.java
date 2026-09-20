@@ -189,19 +189,51 @@ public class ChessPiece {
         Collection<ChessMove> moves = new ArrayList<>();
 
         int direction = (this.pieceColor == ChessGame.TeamColor.WHITE) ? 1 : -1;
+        int startRow = (this.pieceColor == ChessGame.TeamColor.WHITE) ? 2 : 7;
+        int promotionRow = (this.pieceColor == ChessGame.TeamColor.WHITE) ? 8 : 1;
 
         int newRow = myPosition.getRow() + direction;
         int newColumn = myPosition.getColumn();
+
         if (newRow >= 1 && newRow <= 8) {
             ChessPosition newPosition = new ChessPosition(newRow, newColumn);
             ChessPiece occupyingPiece = board.getPiece(newPosition);
             if (occupyingPiece == null) {
-                moves.add(new ChessMove(myPosition, newPosition, null));
-            }
+                addPawnMove(moves, myPosition, newPosition, promotionRow);
 
+                if (myPosition.getRow() == startRow) {
+                    int twoAheadRow = myPosition.getRow() + (2 * direction);
+                    ChessPosition twoAhead = new ChessPosition(twoAheadRow, newColumn);
+                    if (board.getPiece(twoAhead) == null) {
+                        moves.add(new ChessMove(myPosition, twoAhead, null));
+                    }
+                }
+            }
+        }
+
+        int[] captureColumns = { myPosition.getColumn() - 1, myPosition.getColumn() + 1 };
+        for (int captureColumn : captureColumns) {
+            if (newRow >= 1 && newRow <= 8 && captureColumn >= 1 && captureColumn <= 8) {
+                ChessPosition capturePosition = new ChessPosition(newRow, captureColumn);
+                ChessPiece occupyingPiece = board.getPiece(capturePosition);
+                if (occupyingPiece != null && occupyingPiece.getTeamColor() != this.pieceColor) {
+                    addPawnMove(moves, myPosition, capturePosition, promotionRow);
+                }
+            }
         }
 
         return moves;
+    }
+
+    private void addPawnMove(Collection<ChessMove> moves, ChessPosition start, ChessPosition end, int promotionRow) {
+        if (end.getRow() == promotionRow) {
+            moves.add(new ChessMove(start, end, ChessPiece.PieceType.QUEEN));
+            moves.add(new ChessMove(start, end, ChessPiece.PieceType.ROOK));
+            moves.add(new ChessMove(start, end, ChessPiece.PieceType.BISHOP));
+            moves.add(new ChessMove(start, end, ChessPiece.PieceType.KNIGHT));
+        } else {
+            moves.add(new ChessMove(start, end, null));
+        }
     }
 
 
