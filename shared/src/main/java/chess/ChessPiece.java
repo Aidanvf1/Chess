@@ -200,7 +200,6 @@ public class ChessPiece {
             ChessPiece occupyingPiece = board.getPiece(newPosition);
             if (occupyingPiece == null) {
                 addPawnMove(moves, myPosition, newPosition, promotionRow);
-
                 if (myPosition.getRow() == startRow) {
                     int twoAheadRow = myPosition.getRow() + (2 * direction);
                     ChessPosition twoAhead = new ChessPosition(twoAheadRow, newColumn);
