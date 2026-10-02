@@ -1,5 +1,6 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -74,6 +75,21 @@ public class ChessGame {
         }
         return null;
     }
+
+    private Collection<ChessPosition> findPieces(TeamColor teamColor) {
+        Collection<ChessPosition> positions = new ArrayList<>();
+        for (int row = 1; row <= 8; row++) {
+            for (int col = 1; col <= 8; col++) {
+                ChessPosition position = new ChessPosition(row, col);
+                ChessPiece piece = board.getPiece(position);
+                if (piece != null && piece.getTeamColor() == teamColor) {
+                    positions.add(position);
+                }
+            }
+        }
+        return positions;
+    }
+
 
     public boolean isInCheck(TeamColor teamColor) {
         throw new RuntimeException("Not implemented");
