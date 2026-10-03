@@ -133,6 +133,15 @@ public class ChessGame {
         return inCheck;
     }
 
+    private boolean hasNoValidMoves(TeamColor teamColor) {
+        for (ChessPosition position : findPieces(teamColor)) {
+            Collection<ChessMove> moves = validMoves(position);
+            if (moves != null && !moves.isEmpty()) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     public boolean isInCheckmate(TeamColor teamColor) {
         throw new RuntimeException("Not implemented");
