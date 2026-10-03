@@ -92,7 +92,21 @@ public class ChessGame {
 
 
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        ChessPosition kingPosition = findKing(teamColor);
+        if (kingPosition == null) {
+            return false;
+        }
+        TeamColor opponent = (teamColor == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
+        for (ChessPosition opponentPosition : findPieces(opponent)) {
+            ChessPiece opponentPiece = board.getPiece(opponentPosition);
+            Collection<ChessMove> moves = opponentPiece.pieceMoves(board, opponentPosition);
+            for (ChessMove move : moves) {
+                if (move.getEndPosition().equals(kingPosition)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 
