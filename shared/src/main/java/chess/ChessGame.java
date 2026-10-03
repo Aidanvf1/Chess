@@ -108,6 +108,19 @@ public class ChessGame {
         }
         return false;
     }
+    private boolean wouldBeInCheck(ChessMove move, TeamColor teamColor) {
+        ChessBoard simulatedBoard = new ChessBoard(board);
+        ChessPiece movingPiece = simulatedBoard.getPiece(move.getStartPosition());
+        simulatedBoard.addPiece(move.getStartPosition(), null);
+        simulatedBoard.addPiece(move.getEndPosition(), movingPiece);
+
+        ChessBoard realBoard = board;
+        board = simulatedBoard;
+        boolean inCheck = isInCheck(teamColor);
+        board = realBoard;
+
+        return inCheck;
+    }
 
 
     public boolean isInCheckmate(TeamColor teamColor) {
