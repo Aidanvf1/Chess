@@ -81,7 +81,15 @@ public class ChessGame {
             throw new InvalidMoveException("Move is not legal");
         }
 
-        throw new RuntimeException("Not implemented");
+        ChessPiece pieceToPlace = piece;
+        if (move.getPromotionPiece() != null) {
+            pieceToPlace = new ChessPiece(piece.getTeamColor(), move.getPromotionPiece());
+        }
+
+        board.addPiece(move.getStartPosition(), null);
+        board.addPiece(move.getEndPosition(), pieceToPlace);
+
+        teamTurn = (teamTurn == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
     }
 
     private ChessPosition findKing(TeamColor teamColor) {
