@@ -20,13 +20,13 @@ public class ClearServiceTests {
         AuthDAO authDAO = new MemoryAuthDAO();
         GameDAO gameDAO = new MemoryGameDAO();
 
-        userDAO.createUser(new UserData("bob", "password", "bob@mail.com"));
-        authDAO.createAuth(new AuthData("token123", "bob"));
+        userDAO.createUser(new UserData("hobbs", "password", "hobbs@mail.com"));
+        authDAO.createAuth(new AuthData("token123", "hobbs"));
         int gameID = gameDAO.createGame("test game");
 
         new ClearService(userDAO, authDAO, gameDAO).clear();
 
-        Assertions.assertNull(userDAO.getUser("bob"));
+        Assertions.assertNull(userDAO.getUser("hobbs"));
         Assertions.assertNull(authDAO.getAuth("token123"));
         Assertions.assertNull(gameDAO.getGame(gameID));
         Assertions.assertTrue(gameDAO.listGames().isEmpty());
