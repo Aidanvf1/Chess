@@ -44,4 +44,43 @@ public class UserServiceTests {
         Assertions.assertThrows(BadRequestException.class,
                 () -> userService.register(new RegisterRequest("hobbs", null, "hobbs@mail.com")));
     }
+
+    @Test
+    public void loginSuccess() throws ServiceException, DataAccessException {
+        userService.register(new RegisterRequest("hobbs", "pass", "hobbs@mail.com"));
+
+        AuthResult result = userService.login(new LoginRequest("hobbs", "pass"));
+
+        Assertions.assertEquals("hobbs", result.username());
+        Assertions.assertNotNull(authDAO.getAuth(result.authToken()));
+    }
+
+    @Test
+    public void loginWrongPassword() throws ServiceException, DataAccessException {
+        userService.register(new RegisterRequest("hobbs", "pass", "hobbs@mail.com"));
+
+        Assertions.assertThrows(UnauthorizedException.class,
+                () -> userService.login(new LoginRequest("hobbs", "wrong")));
+    }
+
+    @Test
+    public void loginUnknownUser() {
+        Assertions.assertThrows(UnauthorizedException.class,
+                () -> userService.login(new LoginRequest("nobody", "pass")));
+    }
+
+    @Test
+    public void logoutSuccess() throws ServiceException, DataAccessException {
+        AuthResult result = userService.register(new RegisterRequest("hobbs", "pass", "hobbs@mail.com"));
+
+        userService.logout(result.authToken());
+
+        Assertions.assertNull(authDAO.getAuth(result.authToken()));
+    }
+
+    @Test
+    public void logoutInvalidToken() {
+        Assertions.assertThrows(UnauthorizedException.class,
+                () -> userService.logout("not-a-real-token"));
+    }
 }

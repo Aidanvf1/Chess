@@ -32,6 +32,27 @@ public class UserService {
         return new AuthResult(request.username(), authToken);
     }
 
+    public AuthResult login(LoginRequest request) throws ServiceException, DataAccessException {
+        if (request == null || isBlank(request.username()) || isBlank(request.password())) {
+            throw new BadRequestException();
+        }
+        UserData user = userDAO.getUser(request.username());
+        if (user == null || !user.password().equals(request.password())) {
+            throw new UnauthorizedException();
+        }
+
+        String authToken = generateToken();
+        authDAO.createAuth(new AuthData(authToken, request.username()));
+        return new AuthResult(request.username(), authToken);
+    }
+
+    public void logout(String authToken) throws ServiceException, DataAccessException {
+        if (authDAO.getAuth(authToken) == null) {
+            throw new UnauthorizedException();
+        }
+        authDAO.deleteAuth(authToken);
+    }
+
     private static String generateToken() {
         return UUID.randomUUID().toString();
     }
