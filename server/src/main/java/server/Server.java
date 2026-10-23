@@ -12,6 +12,7 @@ import dataaccess.UserDAO;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import service.ClearService;
+import service.GameService;
 import service.ServiceException;
 import service.UserService;
 
@@ -45,7 +46,8 @@ public class Server {
 
         return new Handlers(
                 new ClearService(userDAO, authDAO, gameDAO),
-                new UserService(userDAO, authDAO));
+                new UserService(userDAO, authDAO),
+                new GameService(authDAO, gameDAO));
     }
 
     private void registerEndpoints(Handlers handlers) {
@@ -53,6 +55,8 @@ public class Server {
         javalin.post("/user", handlers::register);
         javalin.post("/session", handlers::login);
         javalin.delete("/session", handlers::logout);
+        javalin.get("/game", handlers::listGames);
+        javalin.post("/game", handlers::createGame);
     }
 
     private void registerExceptionHandlers() {
