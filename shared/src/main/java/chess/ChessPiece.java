@@ -210,7 +210,7 @@ public class ChessPiece {
             }
         }
 
-        int[] captureColumns = { myPosition.getColumn() - 1, myPosition.getColumn() + 1 };
+        int[] captureColumns = {myPosition.getColumn() - 1, myPosition.getColumn() + 1};
         for (int captureColumn : captureColumns) {
             if (newRow >= 1 && newRow <= 8 && captureColumn >= 1 && captureColumn <= 8) {
                 ChessPosition capturePosition = new ChessPosition(newRow, captureColumn);
@@ -236,22 +236,22 @@ public class ChessPiece {
     }
 
 
-            @Override
-            public boolean equals (Object o){
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-            ChessPiece that = (ChessPiece) o;
-            return Objects.equals(this.pieceColor, that.pieceColor)
-                    && Objects.equals(this.type, that.type);
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChessPiece that = (ChessPiece) o;
+        return Objects.equals(this.pieceColor, that.pieceColor)
+                && Objects.equals(this.type, that.type);
 
-        }
+    }
 
-            @Override
-            public int hashCode () {
-            return Objects.hash(pieceColor, type);
-        }
-        }
+    @Override
+    public int hashCode() {
+        return Objects.hash(pieceColor, type);
+    }
+}
