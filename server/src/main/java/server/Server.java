@@ -57,6 +57,7 @@ public class Server {
         javalin.delete("/session", handlers::logout);
         javalin.get("/game", handlers::listGames);
         javalin.post("/game", handlers::createGame);
+        javalin.put("/game", handlers::joinGame);
     }
 
     private void registerExceptionHandlers() {

@@ -6,6 +6,7 @@ import io.javalin.http.Context;
 import service.ClearService;
 import service.CreateGameRequest;
 import service.GameService;
+import service.JoinGameRequest;
 import service.LoginRequest;
 import service.RegisterRequest;
 import service.ServiceException;
@@ -52,6 +53,12 @@ public class Handlers {
 
     public void listGames(Context ctx) throws ServiceException, DataAccessException {
         sendJson(ctx, gameService.listGames(ctx.header("authorization")));
+    }
+
+    public void joinGame(Context ctx) throws ServiceException, DataAccessException {
+        JoinGameRequest request = gson.fromJson(ctx.body(), JoinGameRequest.class);
+        gameService.joinGame(ctx.header("authorization"), request);
+        sendJson(ctx, Map.of());
     }
 
     private void sendJson(Context ctx, Object body) {
