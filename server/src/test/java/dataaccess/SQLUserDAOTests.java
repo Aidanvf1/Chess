@@ -2,6 +2,7 @@ package dataaccess;
 
 import dataaccess.sql.DatabaseInitializer;
 import dataaccess.sql.SQLUserDAO;
+import model.UserData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,12 +27,44 @@ public class SQLUserDAOTests {
     @Test
     public void clearRemovesAllUsers() throws DataAccessException, SQLException {
         insertUserDirectly("hobbs");
-        insertUserDirectly("cavin");
+        insertUserDirectly("wilson");
         Assertions.assertEquals(2, countUsers());
 
         userDAO.clear();
 
         Assertions.assertEquals(0, countUsers());
+    }
+
+    @Test
+    public void createUserStoresUser() throws DataAccessException {
+        UserData user = new UserData("hobbs", "hash", "hobbs@mail.com");
+
+        userDAO.createUser(user);
+
+        Assertions.assertEquals(user, userDAO.getUser("hobbs"));
+    }
+
+    @Test
+    public void createUserDuplicateUsername() throws DataAccessException, SQLException {
+        userDAO.createUser(new UserData("hobbs", "hash", "hobbs@mail.com"));
+
+        Assertions.assertThrows(DataAccessException.class,
+                () -> userDAO.createUser(new UserData("hobbs", "other", "other@mail.com")));
+        Assertions.assertEquals(1, countUsers());
+    }
+
+    @Test
+    public void getUserFindsExistingUser() throws DataAccessException, SQLException {
+        insertUserDirectly("hobbs");
+
+        UserData found = userDAO.getUser("hobbs");
+
+        Assertions.assertEquals(new UserData("hobbs", "hash", "hobbs@mail.com"), found);
+    }
+
+    @Test
+    public void getUserNotFound() throws DataAccessException {
+        Assertions.assertNull(userDAO.getUser("nobody"));
     }
 
     private void insertUserDirectly(String username) throws DataAccessException, SQLException {
