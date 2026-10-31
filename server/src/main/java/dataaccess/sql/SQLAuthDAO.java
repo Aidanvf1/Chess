@@ -34,11 +34,32 @@ public class SQLAuthDAO implements AuthDAO {
 
     @Override
     public AuthData getAuth(String authToken) throws DataAccessException {
-        throw new DataAccessException("not implemented");
+        String sql = "SELECT authToken, username FROM auth WHERE authToken = ?";
+        AuthData auth = null;
+        try (var conn = DatabaseManager.getConnection();
+             var statement = conn.prepareStatement(sql)) {
+            statement.setString(1, authToken);
+            try (var resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    auth = new AuthData(resultSet.getString("authToken"),
+                            resultSet.getString("username"));
+                }
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("failed to get auth token", ex);
+        }
+        return auth;
     }
 
     @Override
     public void deleteAuth(String authToken) throws DataAccessException {
-        throw new DataAccessException("not implemented");
+        String sql = "DELETE FROM auth WHERE authToken = ?";
+        try (var conn = DatabaseManager.getConnection();
+             var statement = conn.prepareStatement(sql)) {
+            statement.setString(1, authToken);
+            statement.executeUpdate();
+        } catch (SQLException ex) {
+            throw new DataAccessException("failed to delete auth token", ex);
+        }
     }
 }

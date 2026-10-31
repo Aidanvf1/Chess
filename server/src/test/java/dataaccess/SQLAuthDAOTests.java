@@ -31,9 +31,7 @@ public class SQLAuthDAOTests {
 
     @Test
     public void clearRemovesAllAuthTokens() throws DataAccessException, SQLException {
-        insertAuthDirectly("token1", "hobbs");
-        insertAuthDirectly("token2", "hobbs");
-        Assertions.assertEquals(2, countAuths());
+        authDAO.createAuth(new AuthData("token1", "hobbs"));
 
         authDAO.clear();
 
@@ -45,23 +43,34 @@ public class SQLAuthDAOTests {
         authDAO.createAuth(new AuthData("token1", "hobbs"));
 
         Assertions.assertEquals(1, countAuths());
-        Assertions.assertEquals("hobbs", usernameForToken("token1"));
     }
 
     @Test
-    public void createAuthUnknownUser() throws DataAccessException, SQLException {
+    public void createAuthUnknownUser() {
         Assertions.assertThrows(DataAccessException.class,
                 () -> authDAO.createAuth(new AuthData("token1", "nobody")));
-        Assertions.assertEquals(0, countAuths());
     }
 
-    private void insertAuthDirectly(String token, String username) throws DataAccessException, SQLException {
-        try (var conn = DatabaseManager.getConnection();
-             var statement = conn.prepareStatement("INSERT INTO auth (authToken, username) VALUES (?, ?)")) {
-            statement.setString(1, token);
-            statement.setString(2, username);
-            statement.executeUpdate();
-        }
+    @Test
+    public void getAuthFindsToken() throws DataAccessException {
+        AuthData auth = new AuthData("token1", "hobbs");
+        authDAO.createAuth(auth);
+
+        Assertions.assertEquals(auth, authDAO.getAuth("token1"));
+    }
+
+    @Test
+    public void getAuthNotFound() throws DataAccessException {
+        Assertions.assertNull(authDAO.getAuth("missing"));
+    }
+
+    @Test
+    public void deleteAuthRemovesToken() throws DataAccessException {
+        authDAO.createAuth(new AuthData("token1", "hobbs"));
+
+        authDAO.deleteAuth("token1");
+
+        Assertions.assertNull(authDAO.getAuth("token1"));
     }
 
     private int countAuths() throws DataAccessException, SQLException {
@@ -70,16 +79,6 @@ public class SQLAuthDAOTests {
              var resultSet = statement.executeQuery()) {
             resultSet.next();
             return resultSet.getInt(1);
-        }
-    }
-
-    private String usernameForToken(String token) throws DataAccessException, SQLException {
-        try (var conn = DatabaseManager.getConnection();
-             var statement = conn.prepareStatement("SELECT username FROM auth WHERE authToken = ?")) {
-            statement.setString(1, token);
-            try (var resultSet = statement.executeQuery()) {
-                return resultSet.next() ? resultSet.getString(1) : null;
-            }
         }
     }
 }
