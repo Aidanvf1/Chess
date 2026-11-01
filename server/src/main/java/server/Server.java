@@ -5,10 +5,11 @@ import com.google.gson.JsonSyntaxException;
 import dataaccess.AuthDAO;
 import dataaccess.DataAccessException;
 import dataaccess.GameDAO;
-import dataaccess.MemoryAuthDAO;
-import dataaccess.MemoryGameDAO;
-import dataaccess.MemoryUserDAO;
 import dataaccess.UserDAO;
+import dataaccess.sql.DatabaseInitializer;
+import dataaccess.sql.SQLAuthDAO;
+import dataaccess.sql.SQLGameDAO;
+import dataaccess.sql.SQLUserDAO;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import service.ClearService;
@@ -24,6 +25,7 @@ public class Server {
     private final Gson gson = new Gson();
 
     public Server() {
+        initializeDatabase();
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
 
         registerEndpoints(createHandlers());
@@ -39,10 +41,18 @@ public class Server {
         javalin.stop();
     }
 
+    private void initializeDatabase() {
+        try {
+            DatabaseInitializer.initialize();
+        } catch (DataAccessException ex) {
+            throw new IllegalStateException("Unable to initialize the database", ex);
+        }
+    }
+
     private Handlers createHandlers() {
-        UserDAO userDAO = new MemoryUserDAO();
-        AuthDAO authDAO = new MemoryAuthDAO();
-        GameDAO gameDAO = new MemoryGameDAO();
+        UserDAO userDAO = new SQLUserDAO();
+        AuthDAO authDAO = new SQLAuthDAO();
+        GameDAO gameDAO = new SQLGameDAO();
 
         return new Handlers(
                 new ClearService(userDAO, authDAO, gameDAO),
