@@ -7,11 +7,16 @@ import dataaccess.DatabaseManager;
 import dataaccess.GameDAO;
 import model.GameData;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Collection;
 
 public class SQLGameDAO implements GameDAO {
+    private static final String SELECT_GAMES =
+            "SELECT gameID, whiteUsername, blackUsername, gameName, game FROM game";
+
     private final Gson gson = new Gson();
 
     @Override
@@ -45,16 +50,46 @@ public class SQLGameDAO implements GameDAO {
 
     @Override
     public GameData getGame(int gameID) throws DataAccessException {
-        throw new DataAccessException("not implemented");
+        GameData game = null;
+        try (var conn = DatabaseManager.getConnection();
+             var statement = conn.prepareStatement(SELECT_GAMES + " WHERE gameID = ?")) {
+            statement.setInt(1, gameID);
+            try (var resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    game = readGame(resultSet);
+                }
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("failed to get game", ex);
+        }
+        return game;
     }
 
     @Override
     public Collection<GameData> listGames() throws DataAccessException {
-        throw new DataAccessException("not implemented");
+        Collection<GameData> games = new ArrayList<>();
+        try (var conn = DatabaseManager.getConnection();
+             var statement = conn.prepareStatement(SELECT_GAMES);
+             var resultSet = statement.executeQuery()) {
+            while (resultSet.next()) {
+                games.add(readGame(resultSet));
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("failed to list games", ex);
+        }
+        return games;
     }
 
     @Override
     public void updateGame(GameData game) throws DataAccessException {
         throw new DataAccessException("not implemented");
+    }
+
+    private GameData readGame(ResultSet resultSet) throws SQLException {
+        return new GameData(resultSet.getInt("gameID"),
+                resultSet.getString("whiteUsername"),
+                resultSet.getString("blackUsername"),
+                resultSet.getString("gameName"),
+                gson.fromJson(resultSet.getString("game"), ChessGame.class));
     }
 }
