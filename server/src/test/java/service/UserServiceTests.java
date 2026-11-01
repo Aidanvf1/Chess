@@ -8,6 +8,7 @@ import dataaccess.UserDAO;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mindrot.jbcrypt.BCrypt;
 
 public class UserServiceTests {
     private UserDAO userDAO;
@@ -23,12 +24,22 @@ public class UserServiceTests {
 
     @Test
     public void registerSuccess() throws ServiceException, DataAccessException {
-        AuthResult result = userService.register(new RegisterRequest("hobbs", "hobbs", "hobbs@mail.com"));
+        AuthResult result = userService.register(new RegisterRequest("hobbs", "pass", "hobbs@mail.com"));
 
         Assertions.assertEquals("hobbs", result.username());
         Assertions.assertNotNull(result.authToken());
         Assertions.assertNotNull(userDAO.getUser("hobbs"));
         Assertions.assertNotNull(authDAO.getAuth(result.authToken()));
+    }
+
+    @Test
+    public void registerStoresHashedPassword() throws ServiceException, DataAccessException {
+        userService.register(new RegisterRequest("hobbs", "pass", "hobbs@mail.com"));
+
+        String stored = userDAO.getUser("hobbs").password();
+
+        Assertions.assertNotEquals("pass", stored);
+        Assertions.assertTrue(BCrypt.checkpw("pass", stored));
     }
 
     @Test
