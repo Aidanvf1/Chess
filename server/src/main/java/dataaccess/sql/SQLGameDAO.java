@@ -82,7 +82,23 @@ public class SQLGameDAO implements GameDAO {
 
     @Override
     public void updateGame(GameData game) throws DataAccessException {
-        throw new DataAccessException("not implemented");
+        String sql = "UPDATE game SET whiteUsername = ?, blackUsername = ?, gameName = ?, game = ? "
+                + "WHERE gameID = ?";
+        int rowsUpdated;
+        try (var conn = DatabaseManager.getConnection();
+             var statement = conn.prepareStatement(sql)) {
+            statement.setString(1, game.whiteUsername());
+            statement.setString(2, game.blackUsername());
+            statement.setString(3, game.gameName());
+            statement.setString(4, gson.toJson(game.game()));
+            statement.setInt(5, game.gameID());
+            rowsUpdated = statement.executeUpdate();
+        } catch (SQLException ex) {
+            throw new DataAccessException("failed to update game", ex);
+        }
+        if (rowsUpdated == 0) {
+            throw new DataAccessException("Game does not exist");
+        }
     }
 
     private GameData readGame(ResultSet resultSet) throws SQLException {

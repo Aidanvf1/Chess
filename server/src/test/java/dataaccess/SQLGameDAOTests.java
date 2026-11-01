@@ -1,6 +1,9 @@
 package dataaccess;
 
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.ChessPosition;
+import chess.InvalidMoveException;
 import dataaccess.sql.DatabaseInitializer;
 import dataaccess.sql.SQLGameDAO;
 import model.GameData;
@@ -72,6 +75,35 @@ public class SQLGameDAOTests {
         Assertions.assertEquals(2, games.size());
         Assertions.assertTrue(games.contains(gameDAO.getGame(firstID)));
         Assertions.assertTrue(games.contains(gameDAO.getGame(secondID)));
+    }
+
+    @Test
+    public void updateGameAddsPlayer() throws DataAccessException {
+        int gameID = gameDAO.createGame("my game");
+        GameData original = gameDAO.getGame(gameID);
+        GameData withPlayer = new GameData(gameID, "hobbs", null, original.gameName(), original.game());
+
+        gameDAO.updateGame(withPlayer);
+
+        Assertions.assertEquals(withPlayer, gameDAO.getGame(gameID));
+    }
+
+    @Test
+    public void updateGameSavesMove() throws DataAccessException, InvalidMoveException {
+        int gameID = gameDAO.createGame("my game");
+        GameData game = gameDAO.getGame(gameID);
+        game.game().makeMove(new ChessMove(new ChessPosition(2, 5), new ChessPosition(4, 5), null));
+
+        gameDAO.updateGame(game);
+
+        Assertions.assertEquals(game, gameDAO.getGame(gameID));
+    }
+
+    @Test
+    public void updateGameNotFound() {
+        GameData missing = new GameData(999, null, null, "ghost", new ChessGame());
+
+        Assertions.assertThrows(DataAccessException.class, () -> gameDAO.updateGame(missing));
     }
 
     private int countGames() throws DataAccessException, SQLException {
