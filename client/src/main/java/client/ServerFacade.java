@@ -33,6 +33,10 @@ public class ServerFacade {
         return sendRequest("POST", "/session", body, null, AuthData.class);
     }
 
+    public void logout(String authToken) throws ResponseException {
+        sendRequest("DELETE", "/session", null, authToken, null);
+    }
+
     private <T> T sendRequest(String method, String path, Object body, String authToken,
                               Class<T> responseType) throws ResponseException {
         HttpRequest request = buildRequest(method, path, body, authToken);

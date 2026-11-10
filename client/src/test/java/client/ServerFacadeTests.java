@@ -73,4 +73,17 @@ public class ServerFacadeTests {
 
         Assertions.assertThrows(ResponseException.class, () -> facade.login("hobbs", "wrong"));
     }
+
+    @Test
+    public void logoutSuccess() throws ResponseException {
+        AuthData authData = facade.register("hobbs", "password", "hobbs@email.com");
+
+        Assertions.assertDoesNotThrow(() -> facade.logout(authData.authToken()));
+        Assertions.assertThrows(ResponseException.class, () -> facade.logout(authData.authToken()));
+    }
+
+    @Test
+    public void logoutInvalidToken() {
+        Assertions.assertThrows(ResponseException.class, () -> facade.logout("not-a-real-token"));
+    }
 }
