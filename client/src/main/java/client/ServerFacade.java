@@ -2,6 +2,7 @@ package client;
 
 import com.google.gson.Gson;
 import model.AuthData;
+import model.GameData;
 
 import java.io.IOException;
 import java.net.URI;
@@ -35,6 +36,11 @@ public class ServerFacade {
 
     public void logout(String authToken) throws ResponseException {
         sendRequest("DELETE", "/session", null, authToken, null);
+    }
+
+    public int createGame(String authToken, String gameName) throws ResponseException {
+        var body = Map.of("gameName", gameName);
+        return sendRequest("POST", "/game", body, authToken, GameData.class).gameID();
     }
 
     private <T> T sendRequest(String method, String path, Object body, String authToken,

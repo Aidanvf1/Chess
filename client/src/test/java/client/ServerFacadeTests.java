@@ -86,4 +86,19 @@ public class ServerFacadeTests {
     public void logoutInvalidToken() {
         Assertions.assertThrows(ResponseException.class, () -> facade.logout("not-a-real-token"));
     }
+
+    @Test
+    public void createGameSuccess() throws ResponseException {
+        AuthData authData = facade.register("hobbs", "password", "hobbs@email.com");
+
+        int gameID = facade.createGame(authData.authToken(), "Hobbs vs Ellie");
+
+        Assertions.assertTrue(gameID > 0);
+    }
+
+    @Test
+    public void createGameUnauthorized() {
+        Assertions.assertThrows(ResponseException.class,
+                () -> facade.createGame("not-a-real-token", "Hobbs vs Ellie"));
+    }
 }
