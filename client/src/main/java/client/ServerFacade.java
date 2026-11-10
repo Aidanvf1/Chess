@@ -9,6 +9,9 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 
 public class ServerFacade {
@@ -41,6 +44,11 @@ public class ServerFacade {
     public int createGame(String authToken, String gameName) throws ResponseException {
         var body = Map.of("gameName", gameName);
         return sendRequest("POST", "/game", body, authToken, GameData.class).gameID();
+    }
+
+    public List<GameData> listGames(String authToken) throws ResponseException {
+        GameList response = sendRequest("GET", "/game", null, authToken, GameList.class);
+        return Arrays.stream(response.games()).sorted(Comparator.comparingInt(GameData::gameID)).toList();
     }
 
     private <T> T sendRequest(String method, String path, Object body, String authToken,
@@ -89,5 +97,8 @@ public class ServerFacade {
             case 403 -> "That is already taken.";
             default -> "The server ran into a problem. Please try again.";
         };
+    }
+
+    private record GameList(GameData[] games) {
     }
 }

@@ -1,8 +1,11 @@
 package client;
 
 import model.AuthData;
+import model.GameData;
 import org.junit.jupiter.api.*;
 import server.Server;
+
+import java.util.List;
 
 public class ServerFacadeTests {
 
@@ -100,5 +103,23 @@ public class ServerFacadeTests {
     public void createGameUnauthorized() {
         Assertions.assertThrows(ResponseException.class,
                 () -> facade.createGame("not-a-real-token", "Hobbs vs Ellie"));
+    }
+
+    @Test
+    public void listGamesSuccess() throws ResponseException {
+        AuthData authData = facade.register("hobbs", "password", "hobbs@email.com");
+        facade.createGame(authData.authToken(), "Hobbs vs Ellie");
+        facade.createGame(authData.authToken(), "Ellie vs Hobbs");
+
+        List<GameData> games = facade.listGames(authData.authToken());
+
+        Assertions.assertEquals(2, games.size());
+        Assertions.assertEquals("Hobbs vs Ellie", games.get(0).gameName());
+        Assertions.assertEquals("Ellie vs Hobbs", games.get(1).gameName());
+    }
+
+    @Test
+    public void listGamesUnauthorized() {
+        Assertions.assertThrows(ResponseException.class, () -> facade.listGames("not-a-real-token"));
     }
 }
