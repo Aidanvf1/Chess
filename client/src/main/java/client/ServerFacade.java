@@ -28,6 +28,11 @@ public class ServerFacade {
         return sendRequest("POST", "/user", body, null, AuthData.class);
     }
 
+    public AuthData login(String username, String password) throws ResponseException {
+        var body = Map.of("username", username, "password", password);
+        return sendRequest("POST", "/session", body, null, AuthData.class);
+    }
+
     private <T> T sendRequest(String method, String path, Object body, String authToken,
                               Class<T> responseType) throws ResponseException {
         HttpRequest request = buildRequest(method, path, body, authToken);
