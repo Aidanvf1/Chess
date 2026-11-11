@@ -1,5 +1,6 @@
 package client;
 
+import chess.ChessGame;
 import model.AuthData;
 import model.GameData;
 import org.junit.jupiter.api.*;
@@ -121,5 +122,30 @@ public class ServerFacadeTests {
     @Test
     public void listGamesUnauthorized() {
         Assertions.assertThrows(ResponseException.class, () -> facade.listGames("not-a-real-token"));
+    }
+
+    @Test
+    public void joinGameSuccess() throws ResponseException {
+        AuthData hobbs = facade.register("hobbs", "password", "hobbs@email.com");
+        AuthData ellie = facade.register("ellie", "password", "ellie@email.com");
+        int gameID = facade.createGame(hobbs.authToken(), "Hobbs vs Ellie");
+
+        facade.joinGame(hobbs.authToken(), ChessGame.TeamColor.WHITE, gameID);
+        facade.joinGame(ellie.authToken(), ChessGame.TeamColor.BLACK, gameID);
+
+        GameData game = facade.listGames(hobbs.authToken()).get(0);
+        Assertions.assertEquals("hobbs", game.whiteUsername());
+        Assertions.assertEquals("ellie", game.blackUsername());
+    }
+
+    @Test
+    public void joinGameColorTaken() throws ResponseException {
+        AuthData hobbs = facade.register("hobbs", "password", "hobbs@email.com");
+        AuthData ellie = facade.register("ellie", "password", "ellie@email.com");
+        int gameID = facade.createGame(hobbs.authToken(), "Hobbs vs Ellie");
+        facade.joinGame(hobbs.authToken(), ChessGame.TeamColor.WHITE, gameID);
+
+        Assertions.assertThrows(ResponseException.class,
+                () -> facade.joinGame(ellie.authToken(), ChessGame.TeamColor.WHITE, gameID));
     }
 }
