@@ -1,5 +1,6 @@
 package client;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import model.AuthData;
 import model.GameData;
@@ -49,6 +50,11 @@ public class ServerFacade {
     public List<GameData> listGames(String authToken) throws ResponseException {
         GameList response = sendRequest("GET", "/game", null, authToken, GameList.class);
         return Arrays.stream(response.games()).sorted(Comparator.comparingInt(GameData::gameID)).toList();
+    }
+
+    public void joinGame(String authToken, ChessGame.TeamColor playerColor, int gameID) throws ResponseException {
+        Map<String, Object> body = Map.of("playerColor", playerColor, "gameID", gameID);
+        sendRequest("PUT", "/game", body, authToken, null);
     }
 
     private <T> T sendRequest(String method, String path, Object body, String authToken,
