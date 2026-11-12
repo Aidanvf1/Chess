@@ -4,6 +4,7 @@ import client.ResponseException;
 import client.ServerFacade;
 import model.AuthData;
 
+import java.util.Arrays;
 import java.util.Scanner;
 
 import static ui.EscapeSequences.*;
@@ -64,6 +65,7 @@ public class Repl {
     private void handleSignedIn(String[] words) {
         switch (words[0].toLowerCase()) {
             case "help" -> printSignedInHelp();
+            case "create" -> createGame(words);
             case "logout" -> logout();
             default -> printUnknownCommand();
         }
@@ -97,6 +99,20 @@ public class Repl {
         authToken = authData.authToken();
         state = State.SIGNEDIN;
         System.out.println(greeting + authData.username() + ".");
+    }
+
+    private void createGame(String[] words) {
+        if (words.length < 2) {
+            System.out.println("Usage: create <NAME>");
+            return;
+        }
+        String gameName = String.join(" ", Arrays.copyOfRange(words, 1, words.length));
+        try {
+            facade.createGame(authToken, gameName);
+            System.out.println("Created game \"" + gameName + "\".");
+        } catch (ResponseException ex) {
+            System.out.println(ex.getMessage());
+        }
     }
 
     private void logout() {
