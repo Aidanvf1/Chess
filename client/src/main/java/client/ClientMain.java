@@ -1,17 +1,22 @@
 package client;
 
-import chess.*;
-import ui.BoardRenderer;
+import ui.Repl;
 
 public class ClientMain {
+    private static final int DEFAULT_PORT = 8080;
+
     public static void main(String[] args) {
-        var piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
-        System.out.println("♕ 240 Chess Client: " + piece);
-        var board = new ChessBoard();
-        board.resetBoard();
-        var renderer = new BoardRenderer();
-        System.out.print(renderer.render(board, ChessGame.TeamColor.WHITE));
-        System.out.println();
-        System.out.print(renderer.render(board, ChessGame.TeamColor.BLACK));
+        int port;
+        try {
+            port = parsePort(args);
+        } catch (NumberFormatException ex) {
+            System.err.println("Usage: ClientMain [port]");
+            return;
+        }
+        new Repl(new ServerFacade(port)).run();
+    }
+
+    private static int parsePort(String[] args) {
+        return args.length == 1 ? Integer.parseInt(args[0]) : DEFAULT_PORT;
     }
 }
