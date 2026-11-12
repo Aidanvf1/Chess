@@ -3,8 +3,10 @@ package ui;
 import client.ResponseException;
 import client.ServerFacade;
 import model.AuthData;
+import model.GameData;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 
 import static ui.EscapeSequences.*;
@@ -20,6 +22,7 @@ public class Repl {
     private final Scanner scanner = new Scanner(System.in);
     private State state = State.SIGNEDOUT;
     private String authToken;
+    private List<GameData> games = List.of();
 
     public Repl(ServerFacade facade) {
         this.facade = facade;
@@ -66,6 +69,7 @@ public class Repl {
         switch (words[0].toLowerCase()) {
             case "help" -> printSignedInHelp();
             case "create" -> createGame(words);
+            case "list" -> listGames(words);
             case "logout" -> logout();
             default -> printUnknownCommand();
         }
@@ -113,6 +117,42 @@ public class Repl {
         } catch (ResponseException ex) {
             System.out.println(ex.getMessage());
         }
+    }
+
+    private void listGames(String[] words) {
+        if (words.length != 1) {
+            System.out.println("Usage: list");
+            return;
+        }
+        try {
+            loadGames();
+            printGames();
+        } catch (ResponseException ex) {
+            System.out.println(ex.getMessage());
+        }
+    }
+
+    private void loadGames() throws ResponseException {
+        games = facade.listGames(authToken);
+    }
+
+    private void printGames() {
+        if (games.isEmpty()) {
+            System.out.println("There are no games yet. Make one with: create <NAME>");
+        }
+        for (int index = 0; index < games.size(); index++) {
+            System.out.println(describeGame(index + 1, games.get(index)));
+        }
+    }
+
+    private String describeGame(int number, GameData game) {
+        return "  " + number + ". " + game.gameName()
+                + " - White: " + playerName(game.whiteUsername())
+                + ", Black: " + playerName(game.blackUsername());
+    }
+
+    private String playerName(String username) {
+        return username == null ? "(open)" : username;
     }
 
     private void logout() {
