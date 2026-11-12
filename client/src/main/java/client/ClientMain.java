@@ -9,6 +9,9 @@ public class ClientMain {
         System.out.println("♕ 240 Chess Client: " + piece);
         var board = new ChessBoard();
         board.resetBoard();
-        System.out.print(new BoardRenderer().render(board));
+        var renderer = new BoardRenderer();
+        System.out.print(renderer.render(board, ChessGame.TeamColor.WHITE));
+        System.out.println();
+        System.out.print(renderer.render(board, ChessGame.TeamColor.BLACK));
     }
 }

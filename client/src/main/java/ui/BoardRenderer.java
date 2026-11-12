@@ -14,32 +14,42 @@ public class BoardRenderer {
     private static final String BORDER_STYLE = SET_BG_COLOR_BLACK + SET_TEXT_COLOR_WHITE;
     private static final String RESET_STYLE = RESET_BG_COLOR + RESET_TEXT_COLOR;
 
-    public String render(ChessBoard board) {
+    public String render(ChessBoard board, ChessGame.TeamColor perspective) {
+        boolean fromBlackSide = perspective == ChessGame.TeamColor.BLACK;
         StringBuilder output = new StringBuilder();
-        appendColumnLabels(output);
-        for (int row = BOARD_SIZE; row >= 1; row--) {
-            appendRow(output, board, row);
+        appendColumnLabels(output, fromBlackSide);
+        for (int line = 0; line < BOARD_SIZE; line++) {
+            appendRow(output, board, displayedRow(line, fromBlackSide), fromBlackSide);
         }
-        appendColumnLabels(output);
+        appendColumnLabels(output, fromBlackSide);
         return output.toString();
     }
 
-    private void appendColumnLabels(StringBuilder output) {
+    private void appendColumnLabels(StringBuilder output, boolean fromBlackSide) {
         appendBorderCell(output, " ");
-        for (int column = 0; column < BOARD_SIZE; column++) {
-            appendBorderCell(output, String.valueOf(COLUMN_LETTERS.charAt(column)));
+        for (int position = 0; position < BOARD_SIZE; position++) {
+            int column = displayedColumn(position, fromBlackSide);
+            appendBorderCell(output, String.valueOf(COLUMN_LETTERS.charAt(column - 1)));
         }
         appendBorderCell(output, " ");
         output.append(RESET_STYLE).append("\n");
     }
 
-    private void appendRow(StringBuilder output, ChessBoard board, int row) {
+    private void appendRow(StringBuilder output, ChessBoard board, int row, boolean fromBlackSide) {
         appendBorderCell(output, String.valueOf(row));
-        for (int column = 1; column <= BOARD_SIZE; column++) {
-            appendSquare(output, board, row, column);
+        for (int position = 0; position < BOARD_SIZE; position++) {
+            appendSquare(output, board, row, displayedColumn(position, fromBlackSide));
         }
         appendBorderCell(output, String.valueOf(row));
         output.append(RESET_STYLE).append("\n");
+    }
+
+    private int displayedRow(int line, boolean fromBlackSide) {
+        return fromBlackSide ? line + 1 : BOARD_SIZE - line;
+    }
+
+    private int displayedColumn(int position, boolean fromBlackSide) {
+        return fromBlackSide ? BOARD_SIZE - position : position + 1;
     }
 
     private void appendBorderCell(StringBuilder output, String label) {
