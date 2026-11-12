@@ -1,5 +1,7 @@
 package ui;
 
+import chess.ChessBoard;
+import chess.ChessGame;
 import client.ResponseException;
 import client.ServerFacade;
 import model.AuthData;
@@ -19,6 +21,7 @@ public class Repl {
     }
 
     private final ServerFacade facade;
+    private final BoardRenderer renderer = new BoardRenderer();
     private final Scanner scanner = new Scanner(System.in);
     private State state = State.SIGNEDOUT;
     private String authToken;
@@ -70,6 +73,7 @@ public class Repl {
             case "help" -> printSignedInHelp();
             case "create" -> createGame(words);
             case "list" -> listGames(words);
+            case "play" -> playGame(words);
             case "logout" -> logout();
             default -> printUnknownCommand();
         }
@@ -153,6 +157,53 @@ public class Repl {
 
     private String playerName(String username) {
         return username == null ? "(open)" : username;
+    }
+
+    private void playGame(String[] words) {
+        if (words.length != 3) {
+            System.out.println("Usage: play <NUMBER> <WHITE|BLACK>");
+            return;
+        }
+        try {
+            int number = parseNumber(words[1]);
+            ChessGame.TeamColor color = parseColor(words[2]);
+            GameData game = findGame(number);
+            facade.joinGame(authToken, color, game.gameID());
+            System.out.println("Joined \"" + game.gameName() + "\" as " + color.name().toLowerCase() + ".");
+            printBoard(color);
+        } catch (IllegalArgumentException | ResponseException ex) {
+            System.out.println(ex.getMessage());
+        }
+    }
+
+    private int parseNumber(String text) {
+        try {
+            return Integer.parseInt(text);
+        } catch (NumberFormatException ex) {
+            throw new IllegalArgumentException("\"" + text + "\" is not a game number. Use a number from list, like 1.");
+        }
+    }
+
+    private ChessGame.TeamColor parseColor(String text) {
+        return switch (text.toLowerCase()) {
+            case "white" -> ChessGame.TeamColor.WHITE;
+            case "black" -> ChessGame.TeamColor.BLACK;
+            default -> throw new IllegalArgumentException("Pick a color: white or black.");
+        };
+    }
+
+    private GameData findGame(int number) throws ResponseException {
+        loadGames();
+        if (number < 1 || number > games.size()) {
+            throw new IllegalArgumentException("There is no game number " + number + ". Type list to see the games.");
+        }
+        return games.get(number - 1);
+    }
+
+    private void printBoard(ChessGame.TeamColor perspective) {
+        ChessBoard board = new ChessBoard();
+        board.resetBoard();
+        System.out.print(renderer.render(board, perspective));
     }
 
     private void logout() {
