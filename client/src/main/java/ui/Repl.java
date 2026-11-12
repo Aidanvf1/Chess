@@ -55,6 +55,7 @@ public class Repl {
         switch (words[0].toLowerCase()) {
             case "help" -> printSignedOutHelp();
             case "register" -> register(words);
+            case "login" -> login(words);
             case "quit" -> state = State.QUIT;
             default -> printUnknownCommand();
         }
@@ -74,13 +75,28 @@ public class Repl {
             return;
         }
         try {
-            AuthData authData = facade.register(words[1], words[2], words[3]);
-            authToken = authData.authToken();
-            state = State.SIGNEDIN;
-            System.out.println("Registered and logged in as " + authData.username() + ".");
+            signIn(facade.register(words[1], words[2], words[3]), "Registered and logged in as ");
         } catch (ResponseException ex) {
             System.out.println(ex.getMessage());
         }
+    }
+
+    private void login(String[] words) {
+        if (words.length != 3) {
+            System.out.println("Usage: login <USERNAME> <PASSWORD>");
+            return;
+        }
+        try {
+            signIn(facade.login(words[1], words[2]), "Logged in as ");
+        } catch (ResponseException ex) {
+            System.out.println(ex.getMessage());
+        }
+    }
+
+    private void signIn(AuthData authData, String greeting) {
+        authToken = authData.authToken();
+        state = State.SIGNEDIN;
+        System.out.println(greeting + authData.username() + ".");
     }
 
     private void logout() {
