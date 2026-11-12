@@ -1,6 +1,8 @@
 package ui;
 
+import client.ResponseException;
 import client.ServerFacade;
+import model.AuthData;
 
 import java.util.Scanner;
 
@@ -9,12 +11,14 @@ import static ui.EscapeSequences.*;
 public class Repl {
     private enum State {
         SIGNEDOUT,
+        SIGNEDIN,
         QUIT
     }
 
     private final ServerFacade facade;
     private final Scanner scanner = new Scanner(System.in);
     private State state = State.SIGNEDOUT;
+    private String authToken;
 
     public Repl(ServerFacade facade) {
         this.facade = facade;
@@ -24,7 +28,9 @@ public class Repl {
         System.out.println("♕ Welcome to 240 Chess. Type help to get started.");
         while (state != State.QUIT) {
             String input = readInput();
-            if (!input.isBlank()) {
+            if (input == null) {
+                state = State.QUIT;
+            } else if (!input.isBlank()) {
                 evaluate(input);
             }
         }
@@ -33,26 +39,74 @@ public class Repl {
 
     private String readInput() {
         System.out.print("\n>>> ");
-        return scanner.hasNextLine() ? scanner.nextLine() : "quit";
+        return scanner.hasNextLine() ? scanner.nextLine() : null;
     }
 
     private void evaluate(String input) {
         String[] words = input.trim().split("\\s+");
-        handleSignedOut(words);
+        if (state == State.SIGNEDOUT) {
+            handleSignedOut(words);
+        } else {
+            handleSignedIn(words);
+        }
     }
 
     private void handleSignedOut(String[] words) {
         switch (words[0].toLowerCase()) {
             case "help" -> printSignedOutHelp();
+            case "register" -> register(words);
             case "quit" -> state = State.QUIT;
             default -> printUnknownCommand();
         }
+    }
+
+    private void handleSignedIn(String[] words) {
+        switch (words[0].toLowerCase()) {
+            case "help" -> printSignedInHelp();
+            case "logout" -> logout();
+            default -> printUnknownCommand();
+        }
+    }
+
+    private void register(String[] words) {
+        if (words.length != 4) {
+            System.out.println("Usage: register <USERNAME> <PASSWORD> <EMAIL>");
+            return;
+        }
+        try {
+            AuthData authData = facade.register(words[1], words[2], words[3]);
+            authToken = authData.authToken();
+            state = State.SIGNEDIN;
+            System.out.println("Registered and logged in as " + authData.username() + ".");
+        } catch (ResponseException ex) {
+            System.out.println(ex.getMessage());
+        }
+    }
+
+    private void logout() {
+        try {
+            facade.logout(authToken);
+            System.out.println("Logged out.");
+        } catch (ResponseException ex) {
+            System.out.println(ex.getMessage());
+        }
+        authToken = null;
+        state = State.SIGNEDOUT;
     }
 
     private void printSignedOutHelp() {
         printCommand("register <USERNAME> <PASSWORD> <EMAIL>", "create an account");
         printCommand("login <USERNAME> <PASSWORD>", "sign in and play");
         printCommand("quit", "exit the program");
+        printCommand("help", "show this list");
+    }
+
+    private void printSignedInHelp() {
+        printCommand("create <NAME>", "start a new game");
+        printCommand("list", "show all games");
+        printCommand("play <NUMBER> <WHITE|BLACK>", "join a game as a color");
+        printCommand("observe <NUMBER>", "watch a game");
+        printCommand("logout", "sign out");
         printCommand("help", "show this list");
     }
 
