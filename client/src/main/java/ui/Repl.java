@@ -199,7 +199,8 @@ public class Repl {
         try {
             return Integer.parseInt(text);
         } catch (NumberFormatException ex) {
-            throw new IllegalArgumentException("\"" + text + "\" is not a game number. Use a number from list, like 1.");
+            throw new IllegalArgumentException(
+                    "\"" + text + "\" is not a game number. Use a number from list, like 1.");
         }
     }
 
@@ -214,7 +215,8 @@ public class Repl {
     private GameData findGame(int number) throws ResponseException {
         loadGames();
         if (number < 1 || number > games.size()) {
-            throw new IllegalArgumentException("There is no game number " + number + ". Type list to see the games.");
+            throw new IllegalArgumentException(
+                    "There is no game number " + number + ". Type list to see the games.");
         }
         return games.get(number - 1);
     }
