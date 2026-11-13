@@ -10,12 +10,15 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
 public class ServerFacade {
+    private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(10);
+
     private final HttpClient httpClient = HttpClient.newHttpClient();
     private final Gson gson = new Gson();
     private final String serverUrl;
@@ -68,7 +71,7 @@ public class ServerFacade {
     }
 
     private HttpRequest buildRequest(String method, String path, Object body, String authToken) {
-        var builder = HttpRequest.newBuilder(URI.create(serverUrl + path));
+        var builder = HttpRequest.newBuilder(URI.create(serverUrl + path)).timeout(REQUEST_TIMEOUT);
         if (body == null) {
             builder.method(method, HttpRequest.BodyPublishers.noBody());
         } else {

@@ -51,10 +51,14 @@ public class Repl {
 
     private void evaluate(String input) {
         String[] words = input.trim().split("\\s+");
-        if (state == State.SIGNEDOUT) {
-            handleSignedOut(words);
-        } else {
-            handleSignedIn(words);
+        try {
+            if (state == State.SIGNEDOUT) {
+                handleSignedOut(words);
+            } else {
+                handleSignedIn(words);
+            }
+        } catch (RuntimeException ex) {
+            System.out.println("Something went wrong. Please try again.");
         }
     }
 
