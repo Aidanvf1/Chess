@@ -45,8 +45,12 @@ public class Repl {
     }
 
     private String readInput() {
-        System.out.print("\n>>> ");
+        System.out.print("\n" + promptLabel() + " >>> ");
         return scanner.hasNextLine() ? scanner.nextLine() : null;
+    }
+
+    private String promptLabel() {
+        return state == State.SIGNEDIN ? "[LOGGED_IN]" : "[LOGGED_OUT]";
     }
 
     private void evaluate(String input) {
