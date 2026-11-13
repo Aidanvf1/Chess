@@ -74,6 +74,7 @@ public class Repl {
             case "create" -> createGame(words);
             case "list" -> listGames(words);
             case "play" -> playGame(words);
+            case "observe" -> observeGame(words);
             case "logout" -> logout();
             default -> printUnknownCommand();
         }
@@ -171,6 +172,20 @@ public class Repl {
             facade.joinGame(authToken, color, game.gameID());
             System.out.println("Joined \"" + game.gameName() + "\" as " + color.name().toLowerCase() + ".");
             printBoard(color);
+        } catch (IllegalArgumentException | ResponseException ex) {
+            System.out.println(ex.getMessage());
+        }
+    }
+
+    private void observeGame(String[] words) {
+        if (words.length != 2) {
+            System.out.println("Usage: observe <NUMBER>");
+            return;
+        }
+        try {
+            GameData game = findGame(parseNumber(words[1]));
+            System.out.println("Observing \"" + game.gameName() + "\".");
+            printBoard(ChessGame.TeamColor.WHITE);
         } catch (IllegalArgumentException | ResponseException ex) {
             System.out.println(ex.getMessage());
         }
