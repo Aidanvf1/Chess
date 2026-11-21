@@ -12,6 +12,7 @@ import dataaccess.sql.SQLGameDAO;
 import dataaccess.sql.SQLUserDAO;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
+import server.websocket.WebSocketHandler;
 import service.ClearService;
 import service.GameService;
 import service.ServiceException;
@@ -29,6 +30,7 @@ public class Server {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
 
         registerEndpoints(createHandlers());
+        registerWebSocket();
         registerExceptionHandlers();
     }
 
@@ -68,6 +70,11 @@ public class Server {
         javalin.get("/game", handlers::listGames);
         javalin.post("/game", handlers::createGame);
         javalin.put("/game", handlers::joinGame);
+    }
+
+    private void registerWebSocket() {
+        WebSocketHandler webSocketHandler = new WebSocketHandler();
+        javalin.ws("/ws", webSocketHandler::configure);
     }
 
     private void registerExceptionHandlers() {
