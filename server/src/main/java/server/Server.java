@@ -17,6 +17,7 @@ import service.ClearService;
 import service.GameService;
 import service.ServiceException;
 import service.UserService;
+import service.GameplayService;
 
 import java.util.Map;
 
@@ -73,7 +74,8 @@ public class Server {
     }
 
     private void registerWebSocket() {
-        WebSocketHandler webSocketHandler = new WebSocketHandler();
+        GameplayService gameplayService = new GameplayService(new SQLAuthDAO(), new SQLGameDAO());
+        WebSocketHandler webSocketHandler = new WebSocketHandler(gameplayService);
         javalin.ws("/ws", webSocketHandler::configure);
     }
 
