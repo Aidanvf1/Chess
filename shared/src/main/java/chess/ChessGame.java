@@ -8,6 +8,7 @@ public class ChessGame {
 
     private ChessBoard board;
     private TeamColor teamTurn;
+    private boolean gameOver;
 
     public ChessGame() {
         board = new ChessBoard();
@@ -30,6 +31,15 @@ public class ChessGame {
      */
     public void setTeamTurn(TeamColor team) {
         teamTurn = team;
+    }
+
+
+    public boolean isGameOver() {
+        return gameOver;
+    }
+
+    public void setGameOver(boolean gameOver) {
+        this.gameOver = gameOver;
     }
 
     /**
@@ -139,6 +149,7 @@ public class ChessGame {
         }
         return false;
     }
+
     private boolean wouldBeInCheck(ChessMove move, TeamColor teamColor) {
         ChessBoard simulatedBoard = new ChessBoard(board);
         ChessPiece movingPiece = simulatedBoard.getPiece(move.getStartPosition());
