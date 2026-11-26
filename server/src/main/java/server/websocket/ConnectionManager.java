@@ -26,11 +26,29 @@ public class ConnectionManager {
         ctx.send(gson.toJson(message));
     }
 
-    public void broadcast(int gameID, ServerMessage message, WsContext excluded) {
-        for (WsContext ctx : gameConnections.getOrDefault(gameID, Set.of())) {
+    public void broadcastToAll(int gameID, ServerMessage message) {
+        for (WsContext ctx : connectionsIn(gameID)) {
+            sendOrDrop(ctx, message);
+        }
+    }
+
+    public void broadcastToOthers(int gameID, ServerMessage message, WsContext excluded) {
+        for (WsContext ctx : connectionsIn(gameID)) {
             if (!ctx.equals(excluded)) {
-                send(ctx, message);
+                sendOrDrop(ctx, message);
             }
+        }
+    }
+
+    private Set<WsContext> connectionsIn(int gameID) {
+        return gameConnections.getOrDefault(gameID, Set.of());
+    }
+
+    private void sendOrDrop(WsContext ctx, ServerMessage message) {
+        try {
+            send(ctx, message);
+        } catch (RuntimeException ex) {
+            remove(ctx);
         }
     }
 }
